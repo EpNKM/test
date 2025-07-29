@@ -10,27 +10,33 @@ public class Main {
         // Initialize banks
         List<Bank> banks = new ArrayList<>();
         for (int i = 1; i <= Config.getBanksCount(); i++) {
-            banks.add(new Bank(i));
+            Bank bank = new Bank(i);
+            banks.add(bank);
+            bank.start();
         }
 
         // Initialize workers
         List<Worker> workers = new ArrayList<>();
         for (int i = 1; i <= Config.getWorkersCount(); i++) {
-            workers.add(new Worker(i));
+            Worker worker = new Worker(i);
+            workers.add(worker);
+            worker.start();
         }
 
         // Initialize spenders
         List<Spender> spenders = new ArrayList<>();
         for (int i = 1; i <= Config.getSpendersCount(); i++) {
-            spenders.add(new Spender(i));
+            Spender spender = new Spender(i);
+            spenders.add(spender);
+            spender.start();
         }
 
         // Initialize Media
         Media media = new Media(banks, workers, spenders, helpDesk);
         media.start();
 
-        System.out.println("Total money amount in city on day start: " + 
-                          helpDesk.getTotalMoney() + "$");
+        int initialTotal = helpDesk.calculateTotalMoney(banks, workers, spenders);
+        System.out.println("Total money amount in city on day start: " + initialTotal + "$");
 
         // Wait for work day to end
         try {
@@ -55,7 +61,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println("Total money amount in city on day end: " + 
-                          helpDesk.getTotalMoney() + "$");
+        int finalTotal = helpDesk.calculateTotalMoney(banks, workers, spenders);
+        System.out.println("Total money amount in city on day end: " + finalTotal + "$");
     }
 }

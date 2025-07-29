@@ -16,8 +16,6 @@ public class Bank extends Thread {
         this.isOpen = true;
         this.setName("Bank-" + id);
         banks.add(this);
-        HelpDesk.getInstance().addMoney(money);
-        System.out.println("Created " + getName() + " with initial money: " + money + "$");
     }
 
     @Override
@@ -28,7 +26,6 @@ public class Bank extends Thread {
                 isOpen = !isOpen;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                break;
             }
         }
         System.out.println("Thread " + getName() + " has been stopped.");
@@ -39,14 +36,10 @@ public class Bank extends Thread {
     }
 
     public synchronized void takeLoan(Spender spender) {
-        if (!isBusy && isOpen) {
-            isBusy = true;
-            if (money > 0) {
-                int loanAmount = Math.min(money, 10);
-                money -= loanAmount;
-                spender.takeLoan(loanAmount);
-            }
-            isBusy = false;
+        if (money > 0) {
+            int loanAmount = Math.min(money, 10);
+            money -= loanAmount;
+            spender.takeLoan(loanAmount);
         }
     }
 
@@ -58,7 +51,11 @@ public class Bank extends Thread {
         return isBusy;
     }
 
-    public int getMoney() {
+    public synchronized void setBusy(boolean busy) {
+        isBusy = busy;
+    }
+
+    public synchronized int getMoney() {
         return money;
     }
 

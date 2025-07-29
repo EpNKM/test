@@ -13,46 +13,51 @@ public class Spender extends Thread implements Client {
         this.id = id;
         this.money = Config.getPersonInitialMoney();
         this.setName("Spender-" + id);
-        HelpDesk.getInstance().addMoney(money);
-        System.out.println("Created " + getName() + " with initial money: " + money + "$");
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(Config.getWorkerWorkDuration());
-                
                 if (money <= 0) {
-                    List<Bank> banks = Bank.getBanks();
-                    if (!banks.isEmpty()) {
-                        Bank bank = banks.get(random.nextInt(banks.size()));
-                        bank.takeLoan(this);
-                    }
+                    takeLoanFromBank();
                 } else {
-                    Worker worker = findAvailableWorker();
-                    if (worker != null) {
-                        paySalary(worker);
-                        worker.setBusy(false);
-                    }
+                    hireWorker();
                 }
+                Thread.sleep(Config.getWorkerWorkDuration());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                break;
             }
         }
         System.out.println("Thread " + getName() + " has been stopped.");
     }
 
-    private Worker findAvailableWorker() {
-        List<Worker> workers = Worker.getWorkers();
-        for (Worker worker : workers) {
-            if (!worker.isBusy()) {
-                worker.setBusy(true);
-                return worker;
+    private void takeLoanFromBank() {
+        List<Bank> banks = Bank.getBanks();
+        if (!banks.isEmpty()) {
+            Bank bank = banks.get(random.nextInt(banks.size()));
+            synchronized (bank) {
+                if (!bank.isBusy() && bank.isOpen()) {
+                    bank.setBusy(true);
+                    bank.takeLoan(this);
+                    bank.setBusy(false);
+                }
             }
         }
-        return null;
+    }
+
+    private void hireWorker() {
+        List<Worker> workers = Worker.getWorkers();
+        if (!workers.isEmpty()) {
+            Worker worker = workers.get(random.nextInt(workers.size()));
+            synchronized (worker) {
+                if (!worker.isBusy()) {
+                    worker.setBusy(true);
+                    paySalary(worker);
+                    worker.setBusy(false);
+                }
+            }
+        }
     }
 
     public synchronized void paySalary(Worker worker) {
@@ -70,7 +75,7 @@ public class Spender extends Thread implements Client {
         return isBusy;
     }
 
-    public int getMoney() {
+    public synchronized int getMoney() {
         return money;
     }
 

@@ -22,7 +22,7 @@ public class Media extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(3000); // Вывод каждые 3 секунды
+                Thread.sleep(3000);
                 broadcast();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -31,8 +31,9 @@ public class Media extends Thread {
     }
 
     public void broadcast() {
+        int total = helpDesk.calculateTotalMoney(banks, workers, spenders);
         System.out.println("\nGood news for everyone! Total amount money in city is: " + 
-                         helpDesk.getTotalMoney() + "$");
+                         total + "$");
         banks.forEach(bank -> System.out.println("This " + bank.getInfo()));
         workers.forEach(worker -> System.out.println("This " + worker.getInfo()));
         spenders.forEach(spender -> System.out.println("This " + spender.getInfo()));
