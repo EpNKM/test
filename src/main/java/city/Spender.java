@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Random;
 
 public class Spender extends Thread implements Client {
+    private static final Random random = new Random();
     private final int id;
     private int money;
     private boolean isBusy;
-    private static final Random random = new Random();
 
     public Spender(int id) {
         this.id = id;
@@ -25,12 +25,15 @@ public class Spender extends Thread implements Client {
                 
                 if (money <= 0) {
                     List<Bank> banks = Bank.getBanks();
-                    Bank bank = banks.get(random.nextInt(banks.size()));
-                    bank.takeLoan(this);
+                    if (!banks.isEmpty()) {
+                        Bank bank = banks.get(random.nextInt(banks.size()));
+                        bank.takeLoan(this);
+                    }
                 } else {
                     Worker worker = findAvailableWorker();
                     if (worker != null) {
                         paySalary(worker);
+                        worker.setBusy(false);
                     }
                 }
             } catch (InterruptedException e) {
@@ -42,7 +45,13 @@ public class Spender extends Thread implements Client {
     }
 
     private Worker findAvailableWorker() {
-        // Реализация поиска доступного работяги
+        List<Worker> workers = Worker.getWorkers();
+        for (Worker worker : workers) {
+            if (!worker.isBusy()) {
+                worker.setBusy(true);
+                return worker;
+            }
+        }
         return null;
     }
 
@@ -50,22 +59,15 @@ public class Spender extends Thread implements Client {
         if (money >= Config.getSalaryAmount()) {
             money -= Config.getSalaryAmount();
             worker.receiveSalary(Config.getSalaryAmount());
-            System.out.println(getName() + " paid salary to " + worker.getName() + ": " + Config.getSalaryAmount() + "$");
         }
     }
 
     public synchronized void takeLoan(int amount) {
         money += amount;
-        HelpDesk.getInstance().addMoney(amount);
-        System.out.println(getName() + " took loan: " + amount + "$");
     }
 
     public synchronized boolean isBusy() {
         return isBusy;
-    }
-
-    public synchronized void setBusy(boolean busy) {
-        isBusy = busy;
     }
 
     public int getMoney() {
@@ -76,5 +78,4 @@ public class Spender extends Thread implements Client {
     public String getInfo() {
         return getName() + " has money: " + money + "$";
     }
-
 }

@@ -1,23 +1,40 @@
 package city;
 
-public class Media extends Thread {
-    private final Wiretapping wiretapping;
+import java.util.List;
 
-    public Media(Wiretapping wiretapping) {
-        this.wiretapping = wiretapping;
+public class Media extends Thread {
+    private final List<Bank> banks;
+    private final List<Worker> workers;
+    private final List<Spender> spenders;
+    private final HelpDesk helpDesk;
+
+    public Media(List<Bank> banks, List<Worker> workers, 
+                List<Spender> spenders, HelpDesk helpDesk) {
+        this.banks = banks;
+        this.workers = workers;
+        this.spenders = spenders;
+        this.helpDesk = helpDesk;
         this.setDaemon(true);
         this.setName("Media");
     }
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(Config.getLunchDuration());
-                wiretapping.broadcast();
+                Thread.sleep(3000); // Вывод каждые 3 секунды
+                broadcast();
             } catch (InterruptedException e) {
-                break;
+                Thread.currentThread().interrupt();
             }
         }
+    }
+
+    public void broadcast() {
+        System.out.println("\nGood news for everyone! Total amount money in city is: " + 
+                         helpDesk.getTotalMoney() + "$");
+        banks.forEach(bank -> System.out.println("This " + bank.getInfo()));
+        workers.forEach(worker -> System.out.println("This " + worker.getInfo()));
+        spenders.forEach(spender -> System.out.println("This " + spender.getInfo()));
     }
 }

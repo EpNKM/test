@@ -26,7 +26,6 @@ public class Bank extends Thread {
             try {
                 Thread.sleep(Config.getLunchDuration());
                 isOpen = !isOpen;
-                System.out.println(getName() + " is now " + (isOpen ? "open" : "closed"));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
@@ -37,15 +36,17 @@ public class Bank extends Thread {
 
     public synchronized void depositMoney(int amount) {
         money += amount;
-        System.out.println(getName() + " received deposit: " + amount + "$");
     }
 
     public synchronized void takeLoan(Spender spender) {
-        if (money > 0) {
-            int loanAmount = Math.min(money, 10);
-            money -= loanAmount;
-            spender.takeLoan(loanAmount);
-            System.out.println(getName() + " gave loan to " + spender.getName() + ": " + loanAmount + "$");
+        if (!isBusy && isOpen) {
+            isBusy = true;
+            if (money > 0) {
+                int loanAmount = Math.min(money, 10);
+                money -= loanAmount;
+                spender.takeLoan(loanAmount);
+            }
+            isBusy = false;
         }
     }
 
@@ -55,10 +56,6 @@ public class Bank extends Thread {
 
     public synchronized boolean isBusy() {
         return isBusy;
-    }
-
-    public synchronized void setBusy(boolean busy) {
-        isBusy = busy;
     }
 
     public int getMoney() {

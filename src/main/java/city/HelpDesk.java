@@ -26,8 +26,4 @@ public class HelpDesk {
     public synchronized int getTotalMoney() {
         return totalMoney;
     }
-
-    public synchronized void printTotalMoney() {
-        System.out.println("Total money in system: " + totalMoney + "$");
-    }
 }

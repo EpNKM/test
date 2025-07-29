@@ -25,7 +25,12 @@ public class Main {
             spenders.add(new Spender(i));
         }
 
-        System.out.println("Total money amount in city on day start: " + helpDesk.getTotalMoney() + "$");
+        // Initialize Media
+        Media media = new Media(banks, workers, spenders, helpDesk);
+        media.start();
+
+        System.out.println("Total money amount in city on day start: " + 
+                          helpDesk.getTotalMoney() + "$");
 
         // Wait for work day to end
         try {
@@ -38,16 +43,19 @@ public class Main {
         banks.forEach(Thread::interrupt);
         workers.forEach(Thread::interrupt);
         spenders.forEach(Thread::interrupt);
+        media.interrupt();
 
         // Wait for all threads to finish
         try {
             for (Bank bank : banks) bank.join();
             for (Worker worker : workers) worker.join();
             for (Spender spender : spenders) spender.join();
+            media.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Total money amount in city on day end: " + helpDesk.getTotalMoney() + "$");
+        System.out.println("Total money amount in city on day end: " + 
+                          helpDesk.getTotalMoney() + "$");
     }
 }

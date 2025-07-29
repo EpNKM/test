@@ -1,6 +1,10 @@
 package city;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Worker extends Thread implements Client {
+    private static final List<Worker> workers = new ArrayList<>();
     private final int id;
     private int money;
     private boolean isBusy;
@@ -9,6 +13,7 @@ public class Worker extends Thread implements Client {
         this.id = id;
         this.money = Config.getPersonInitialMoney();
         this.setName("Worker-" + id);
+        workers.add(this);
         HelpDesk.getInstance().addMoney(money);
         System.out.println("Created " + getName() + " with initial money: " + money + "$");
     }
@@ -18,9 +23,13 @@ public class Worker extends Thread implements Client {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(Config.getWorkerWorkDuration());
+                
                 if (money >= Config.getWorkerMoneyLimit()) {
-                    Bank bank = Bank.getBanks().get((int)(Math.random() * Bank.getBanks().size()));
-                    depositMoneyToBank(bank);
+                    List<Bank> banks = Bank.getBanks();
+                    if (!banks.isEmpty()) {
+                        Bank bank = banks.get((int)(Math.random() * banks.size()));
+                        depositMoneyToBank(bank);
+                    }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -32,14 +41,11 @@ public class Worker extends Thread implements Client {
 
     public synchronized void receiveSalary(int amount) {
         money += amount;
-        HelpDesk.getInstance().addMoney(amount);
-        System.out.println(getName() + " received salary: " + amount + "$");
     }
 
     public synchronized void depositMoneyToBank(Bank bank) {
         bank.depositMoney(money);
         HelpDesk.getInstance().subtractMoney(money);
-        System.out.println(getName() + " deposited " + money + "$ to " + bank.getName());
         money = 0;
     }
 
@@ -58,5 +64,9 @@ public class Worker extends Thread implements Client {
     @Override
     public String getInfo() {
         return getName() + " has money: " + money + "$";
+    }
+
+    public static List<Worker> getWorkers() {
+        return new ArrayList<>(workers);
     }
 }
