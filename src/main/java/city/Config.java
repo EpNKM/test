@@ -23,6 +23,7 @@ public class Config {
         }
     }
 
+    //If missing config.properties
     private static void setDefaultProperties() {
         properties.setProperty("workDayDuration", "60000");
         properties.setProperty("workerWorkDuration", "1000");
