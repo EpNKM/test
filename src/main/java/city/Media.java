@@ -22,8 +22,8 @@ public class Media extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                broadcast();
                 Thread.sleep(3000);
+                broadcast();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
