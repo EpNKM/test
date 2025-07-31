@@ -19,16 +19,19 @@ public class Media extends Thread {
     }
 
     @Override
-    public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                Thread.sleep(3000);
-                broadcast();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+public void run() {
+    while (!Thread.currentThread().isInterrupted()) {
+        try {
+            broadcast();
+            
+            Thread.sleep(Config.getLunchDuration());
+            
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); 
         }
     }
+    System.out.println("Thread " + getName() + " has been stopped.");
+}
 
     public void broadcast() {
         int total = helpDesk.calculateTotalMoney(banks, workers, spenders);
